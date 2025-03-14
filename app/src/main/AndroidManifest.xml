@@ -30,6 +30,9 @@
         <activity
             android:name=".Activity.MainActivity"
             android:exported="true" />
+        <activity android:name=".Activity.FavoriteActivity"
+                    android:exported="true"
+            />
     </application>
 
 </manifest>

@@ -13,6 +13,7 @@
         android:id="@+id/favorites"
         android:icon="@drawable/btn_2"
         android:title="Favorite"
+        android:onClick=""
         app:cnb_backgroundColor="@color/orange"
         app:cnb_iconColor="@color/white"
         />

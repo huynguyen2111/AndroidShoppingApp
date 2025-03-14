@@ -45,7 +45,11 @@ public class MainActivity extends AppCompatActivity {
         binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
-
+                if (i == R.id.favorites) {
+                    startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
+                } else if (i == R.id.cart) {
+                    startActivity(new Intent(MainActivity.this, CartActivity.class));
+                }
             }
         });
 
