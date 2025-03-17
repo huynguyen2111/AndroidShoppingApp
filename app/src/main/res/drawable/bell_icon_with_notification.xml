@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Biểu tượng chuông cơ bản -->
+    <item android:drawable="@drawable/bell_icon" />
+    <!-- Dấu chấm đỏ để biểu thị thông báo -->
+    <item
+        android:width="10dp"
+        android:height="10dp"
+        android:gravity="top|end">
+        <shape android:shape="oval">
+            <solid android:color="@color/red" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,11 +1,16 @@
 package com.assignment.androidshoppingapp.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
@@ -13,6 +18,7 @@ import androidx.viewpager2.widget.MarginPageTransformer;
 
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 import com.assignment.androidshoppingapp.Adapter.CategoryAdapter;
+import com.assignment.androidshoppingapp.Adapter.HistoryAdapter;
 import com.assignment.androidshoppingapp.Adapter.PopularAdapter;
 import com.assignment.androidshoppingapp.Adapter.SliderAdapter;
 import com.assignment.androidshoppingapp.Domain.BannerModel;
@@ -20,11 +26,25 @@ import com.assignment.androidshoppingapp.R;
 import com.assignment.androidshoppingapp.ViewModel.MainViewModel;
 import com.assignment.androidshoppingapp.databinding.ActivityMainBinding;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MainViewModel viewModel;
+    private boolean hasNotification = false;
+    private boolean isHistoryVisible = false;
+    private SharedPreferences sharedPreferences;
+    private static final String PREF_NAME = "CheckoutHistory";
+    private static final String KEY_HISTORY = "checkout_history";
+    private HistoryAdapter historyAdapter;
+    private ArrayList<String> historyList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +54,158 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         viewModel = new MainViewModel();
 
+        // Khởi tạo SharedPreferences
+        sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+
+        // Khởi tạo danh sách lịch sử và sắp xếp
+        historyList = new ArrayList<>(sharedPreferences.getStringSet(KEY_HISTORY, new HashSet<>()));
+        sortHistoryList(); // Sắp xếp danh sách theo thời gian giảm dần
+
+        historyAdapter = new HistoryAdapter(historyList);
+        binding.historyView.setLayoutManager(new LinearLayoutManager(this));
+        binding.historyView.setAdapter(historyAdapter);
+
+        // Thêm chức năng vuốt để xóa
+        setupSwipeToDelete();
+
         initCategory();
         initSlider();
         initPopular();
         bottomNavigation();
+        handleCheckoutResult();
+        setupBellIcon();
+    }
+
+    private void setupSwipeToDelete() {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false; // Không hỗ trợ kéo thả
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                String itemToDelete = historyList.get(position);
+
+                // Xóa mục khỏi danh sách
+                historyList.remove(position);
+                historyAdapter.notifyItemRemoved(position);
+
+                // Cập nhật SharedPreferences
+                updateSharedPreferences();
+
+                // Nếu danh sách trống, ẩn historyView
+                if (historyList.isEmpty()) {
+                    binding.historyView.setVisibility(View.GONE);
+                    isHistoryVisible = false;
+                }
+
+                Toast.makeText(MainActivity.this, "Đã xóa: " + itemToDelete, Toast.LENGTH_SHORT).show();
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(binding.historyView);
+    }
+
+    private void updateSharedPreferences() {
+        // Cập nhật SharedPreferences với danh sách mới
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet(KEY_HISTORY, new HashSet<>(historyList));
+        editor.apply();
+    }
+
+    private void handleCheckoutResult() {
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("checkout_success", false)) {
+            String purchasedItems = intent.getStringExtra("purchased_items");
+            saveCheckoutHistory(purchasedItems);
+            hasNotification = true;
+            updateBellIcon();
+        }
+    }
+
+    private void saveCheckoutHistory(String purchasedItems) {
+        // Thêm timestamp vào lịch sử
+        String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
+        String historyEntry = timestamp + " - " + purchasedItems;
+
+        // Lấy danh sách lịch sử hiện tại
+        Set<String> historySet = sharedPreferences.getStringSet(KEY_HISTORY, new HashSet<>());
+        Set<String> updatedHistory = new HashSet<>(historySet);
+
+        // Kiểm tra trùng lặp trước khi thêm
+        if (!updatedHistory.contains(historyEntry)) {
+            updatedHistory.add(historyEntry);
+        }
+
+        // Lưu lại danh sách mới
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet(KEY_HISTORY, updatedHistory);
+        editor.apply();
+
+        // Cập nhật danh sách hiển thị
+        historyList.clear();
+        historyList.addAll(updatedHistory);
+        sortHistoryList(); // Sắp xếp lại sau khi thêm
+        historyAdapter.notifyDataSetChanged();
+    }
+
+    private void sortHistoryList() {
+        // Sắp xếp theo thời gian giảm dần (mới nhất ở trên cùng)
+        Collections.sort(historyList, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+                    Date date1 = sdf.parse(o1.split(" - ")[0]);
+                    Date date2 = sdf.parse(o2.split(" - ")[0]);
+                    return date2.compareTo(date1); // Giảm dần
+                } catch (Exception e) {
+                    return 0;
+                }
+            }
+        });
+    }
+
+    private void updateBellIcon() {
+        if (hasNotification) {
+            binding.imageView3.setImageResource(R.drawable.bell_icon_with_notification);
+        } else {
+            binding.imageView3.setImageResource(R.drawable.bell_icon);
+        }
+    }
+
+    private void setupBellIcon() {
+        binding.imageView3.setOnClickListener(v -> {
+            // Toggle hiển thị/ẩn lịch sử
+            isHistoryVisible = !isHistoryVisible;
+            if (isHistoryVisible) {
+                if (historyList.isEmpty()) {
+                    Toast.makeText(this, "Chưa có lịch sử thanh toán", Toast.LENGTH_SHORT).show();
+                    isHistoryVisible = false;
+                } else {
+                    binding.historyView.setVisibility(View.VISIBLE);
+                    binding.historyView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in));
+                    hasNotification = false; // Xóa ký hiệu thông báo sau khi xem
+                    updateBellIcon();
+                }
+            } else {
+                Animation slideOut = AnimationUtils.loadAnimation(this, R.anim.slide_out);
+                slideOut.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {}
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        binding.historyView.setVisibility(View.GONE);
+                    }
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {}
+                });
+                binding.historyView.startAnimation(slideOut);
+            }
+        });
     }
 
     private void bottomNavigation() {
@@ -45,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
-
+                // Xử lý các tab khác nếu cần
             }
         });
 
@@ -74,7 +242,6 @@ public class MainActivity extends AppCompatActivity {
                 binding.progressBarSlider.setVisibility(View.GONE);
             }
         });
-
         viewModel.loadBanner();
     }
 
@@ -87,7 +254,6 @@ public class MainActivity extends AppCompatActivity {
 
         CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
         compositePageTransformer.addTransformer(new MarginPageTransformer(40));
-
         binding.viewPagerSlider.setPageTransformer(compositePageTransformer);
     }
 

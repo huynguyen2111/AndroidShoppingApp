@@ -48,4 +48,5 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     implementation ("com.google.code.gson:gson:2.9.1")
     implementation ("com.github.ismaeldivita:chip-navigation-bar:1.4.0")
+//    implementation ("com.michaelpardo:androidtinydb:0.1.0")
 }

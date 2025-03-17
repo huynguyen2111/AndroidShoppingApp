@@ -65,4 +65,9 @@ public class ManagmentCart {
         }
         return fee;
     }
+
+    public void clearCart() {
+        ArrayList<ItemsModel> emptyCart = new ArrayList<>(); // Tạo danh sách trống
+        tinyDB.putListObject("CartList", emptyCart); // Lưu danh sách trống vào TinyDB
+    }
 }
