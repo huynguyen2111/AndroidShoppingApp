@@ -7,13 +7,13 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.bumptech.glide.Glide;
 import com.assignment.androidshoppingapp.Adapter.ColorAdapter;
 import com.assignment.androidshoppingapp.Adapter.PicListAdapter;
 import com.assignment.androidshoppingapp.Adapter.SizeAdapter;
 import com.assignment.androidshoppingapp.Domain.ItemsModel;
 import com.assignment.androidshoppingapp.Helper.ManagmentCart;
 import com.assignment.androidshoppingapp.databinding.ActivityDetailBinding;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
