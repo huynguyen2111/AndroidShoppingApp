@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterInside;
 import com.bumptech.glide.request.RequestOptions;
-import com.assignment.androidshoppingapp.Activity.DetailActivity;
+import com.assignment.androidshoppingapp.Activity .DetailActivity;
 import com.assignment.androidshoppingapp.Domain.ItemsModel;
 import com.assignment.androidshoppingapp.databinding.ViewholderPopularBinding;
 

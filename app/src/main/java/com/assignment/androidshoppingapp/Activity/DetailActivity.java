@@ -1,13 +1,13 @@
 package com.assignment.androidshoppingapp.Activity;
 
-import android.os.Bundle;
-import android.widget.ImageView;
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
 import com.assignment.androidshoppingapp.Domain.ItemsModel;
 import com.assignment.androidshoppingapp.Helper.ManagementFavorites;
 import com.assignment.androidshoppingapp.R;
 import com.assignment.androidshoppingapp.databinding.ActivityDetailBinding;
+
+import android.os.Bundle;
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
 
 public class DetailActivity extends AppCompatActivity {
     private ActivityDetailBinding binding;
