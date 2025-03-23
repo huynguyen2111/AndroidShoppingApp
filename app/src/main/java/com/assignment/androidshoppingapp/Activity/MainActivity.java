@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.swing.text.View;
 
 import com.assignment.androidshoppingapp.Adapter.CategoryAdapter;
 import com.assignment.androidshoppingapp.Adapter.HistoryAdapter;
@@ -24,6 +23,7 @@ import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Toast;
