@@ -34,13 +34,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        EdgeToEdge.enable(this);
+
         setContentView(R.layout.activity_login);
-//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-//            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-//            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-//            return insets;
-//        });
 
         loginUsername = findViewById(R.id.login_usename);
         loginPassword = findViewById(R.id.login_password);
@@ -90,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
     public void checkUser(){
         String userUsername = loginUsername.getText().toString().trim();
         String userPassword = loginPassword.getText().toString().trim();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("users");
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("User");
         Query checkUserDatabase = reference.orderByChild("username").equalTo(userUsername);
         checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -100,9 +95,21 @@ public class LoginActivity extends AppCompatActivity {
                     loginUsername.setError(null);
                     String passwordFromDB = snapshot.child(userUsername).child("password").getValue(String.class);
 
-                    if (!Objects.equals(passwordFromDB, userPassword)) {
+                    if (passwordFromDB.equals(userPassword)) {
                         loginUsername.setError(null);
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+
+                        //Pass the data using intent
+                        String nameFromDB = snapshot.child(userUsername).child("name").getValue(String.class);
+                        String emailFromDB = snapshot.child(userUsername).child("email").getValue(String.class);
+                        String usernameFromDB = snapshot.child(userUsername).child("username").getValue(String.class);
+
+                        Intent intent = new Intent(LoginActivity.this, ProfileActivity.class);
+
+                        intent.putExtra("name", nameFromDB);
+                        intent.putExtra("email", emailFromDB);
+                        intent.putExtra("username", usernameFromDB);
+                        intent.putExtra("password", passwordFromDB);
+
                         startActivity(intent);
                     } else {
                         loginPassword.setError("Invalid Credentials");
