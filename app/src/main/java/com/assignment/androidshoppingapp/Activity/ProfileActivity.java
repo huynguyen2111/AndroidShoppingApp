@@ -71,20 +71,20 @@ public class ProfileActivity extends AppCompatActivity {
         checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()) {
-                    String nameFromDB = snapshot.child(userUsername).child("name").getValue(String.class);
-                    String emailFromDB = snapshot.child(userUsername).child("email").getValue(String.class);
-                    String usernameFromDB = snapshot.child(userUsername).child("username").getValue(String.class);
-                    String passwordFromDB = snapshot.child(userUsername).child("password").getValue(String.class);
-
-                    Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-
-                    intent.putExtra("name", nameFromDB);
-                    intent.putExtra("email", emailFromDB);
-                    intent.putExtra("username", usernameFromDB);
-                    intent.putExtra("password", passwordFromDB);
-
-                }
+//                if(snapshot.exists()) {
+//                    String nameFromDB = snapshot.child(userUsername).child("name").getValue(String.class);
+//                    String emailFromDB = snapshot.child(userUsername).child("email").getValue(String.class);
+//                    String usernameFromDB = snapshot.child(userUsername).child("username").getValue(String.class);
+//                    String passwordFromDB = snapshot.child(userUsername).child("password").getValue(String.class);
+//
+//                    Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
+//
+//                    intent.putExtra("name", nameFromDB);
+//                    intent.putExtra("email", emailFromDB);
+//                    intent.putExtra("username", usernameFromDB);
+//                    intent.putExtra("password", passwordFromDB);
+//
+//                }
             }
 
             @Override

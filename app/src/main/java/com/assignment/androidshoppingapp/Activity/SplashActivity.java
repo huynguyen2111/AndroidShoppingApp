@@ -21,5 +21,7 @@ public class SplashActivity extends AppCompatActivity {
         binding.startBtn.setOnClickListener(v ->
                 startActivity(new Intent(SplashActivity.this, MainActivity.class)));
 
+        binding.textView3.setOnClickListener(v ->
+                startActivity(new Intent(SplashActivity.this, LoginActivity.class)));
     }
 }

@@ -17,36 +17,34 @@
         tools:targetApi="31">
         <activity
             android:name=".Activity.EditProfileActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Activity.ProfileActivity"
-            android:exported="false" /> <!-- loign -->
+            android:exported="true" /> <!-- loign -->
         <activity
             android:name=".Activity.LoginActivity"
-            android:exported="false" /> <!-- sign up -->
+            android:exported="true" /> <!-- sign up -->
         <activity
             android:name=".Activity.SignupActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
         </activity>
         <activity
             android:name=".Activity.CartActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Activity.DetailActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Activity.SplashActivity"
-            android:exported="false">
-
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
+            android:exported="true">
+             <intent-filter>
+             <action android:name="android.intent.action.MAIN" />
+             <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
         </activity>
         <activity
             android:name=".Activity.MainActivity"
