@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- yêu cầu quyền truy cập trạng thái mạng của thiết bị -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -11,15 +14,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidShoppingApp"
-        tools:targetApi="31" >
-<!--        loign-->
+        tools:targetApi="31">
+        <activity
+            android:name=".Activity.EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.ProfileActivity"
+            android:exported="false" /> <!-- loign -->
         <activity
             android:name=".Activity.LoginActivity"
-            android:exported="false" />
-<!--        sign up -->
+            android:exported="false" /> <!-- sign up -->
         <activity
             android:name=".Activity.SignupActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -34,12 +41,12 @@
             android:exported="false" />
         <activity
             android:name=".Activity.SplashActivity"
-            android:exported="false" >
+            android:exported="false">
 
-<!--             <intent-filter>-->
-<!--             <action android:name="android.intent.action.MAIN" />-->
-<!--             <category android:name="android.intent.category.LAUNCHER" />-->
-<!--             </intent-filter>-->
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".Activity.MainActivity"
