@@ -9,11 +9,14 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
+
 import com.assignment.androidshoppingapp.Adapter.CategoryAdapter;
 import com.assignment.androidshoppingapp.Adapter.HistoryAdapter;
 import com.assignment.androidshoppingapp.Adapter.PopularAdapter;
+import com.assignment.androidshoppingapp.Adapter.SearchAdapter;
 import com.assignment.androidshoppingapp.Adapter.SliderAdapter;
 import com.assignment.androidshoppingapp.Domain.BannerModel;
+import com.assignment.androidshoppingapp.Domain.ItemsModel;
 import com.assignment.androidshoppingapp.R;
 import com.assignment.androidshoppingapp.ViewModel.MainViewModel;
 import com.assignment.androidshoppingapp.databinding.ActivityMainBinding;
@@ -28,6 +31,8 @@ import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -41,8 +46,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
-import com.assignment.androidshoppingapp.Domain.ItemsModel;
-
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MainViewModel viewModel;
@@ -53,8 +56,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_HISTORY = "checkout_history";
     private HistoryAdapter historyAdapter;
     private ArrayList<String> historyList;
-    private PopularAdapter popularAdapter;
+
     private ArrayList<ItemsModel> allItems;
+    private ArrayList<ItemsModel> allPopularItems = new ArrayList<>();
+    private ArrayList<ItemsModel> searchResults = new ArrayList<>();
+    private PopularAdapter popularAdapter;
+    private SearchAdapter searchAdapter;
+    private RecyclerView searchResultView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +82,28 @@ public class MainActivity extends AppCompatActivity {
         binding.historyView.setLayoutManager(new LinearLayoutManager(this));
         binding.historyView.setAdapter(historyAdapter);
 
+        searchResultView = findViewById(R.id.searchResultView);
+        searchResultView.setLayoutManager(new LinearLayoutManager(this));
+
+        binding.editTextText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String query = s.toString();
+                if (!query.isEmpty()) {
+                    performSearch(query);
+                } else {
+                    resetSearch();
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Thêm chức năng vuốt để xóa
         setupSwipeToDelete();
 
         Intent intent = getIntent();
@@ -95,6 +126,32 @@ public class MainActivity extends AppCompatActivity {
             profileIntent.putExtras(getIntent().getExtras());
             startActivity(profileIntent);
         });
+    }
+
+    private void performSearch(String query) {
+        searchResults.clear();
+        for (ItemsModel item : allPopularItems) {
+            if (item.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                searchResults.add(item);
+            }
+        }
+
+        // Hide existing content (Popular, Slider)
+        binding.popularView.setVisibility(View.GONE);
+        binding.viewPagerSlider.setVisibility(View.GONE);
+
+        // Show search results
+        searchAdapter = new SearchAdapter(searchResults);
+        searchResultView.setAdapter(searchAdapter);
+        searchResultView.setVisibility(View.VISIBLE);
+    }
+
+    private void resetSearch() {
+        searchResultView.setVisibility(View.GONE);
+
+        // Show original content again
+        binding.popularView.setVisibility(View.VISIBLE);
+        binding.viewPagerSlider.setVisibility(View.VISIBLE);
     }
 
     private void setupSwipeToDelete() {
@@ -235,19 +292,26 @@ public class MainActivity extends AppCompatActivity {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
         allItems = new ArrayList<>();
         viewModel.loadPopular().observeForever(itemsModels -> {
-            if (!itemsModels.isEmpty()) {
+            if (itemsModels != null && !itemsModels.isEmpty()) {
                 allItems.clear();
                 allItems.addAll(itemsModels);
                 popularAdapter = new PopularAdapter(new ArrayList<>(allItems));
                 binding.popularView.setLayoutManager(
                         new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
+                allPopularItems.clear();
+                allPopularItems.addAll(itemsModels);
+
+                // Initialize adapter for popular items
+                popularAdapter = new PopularAdapter(allPopularItems);
+                searchAdapter = new SearchAdapter(allPopularItems);
+                binding.popularView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
                 binding.popularView.setAdapter(popularAdapter);
                 binding.popularView.setNestedScrollingEnabled(true);
             }
             binding.progressBarPopular.setVisibility(View.GONE);
         });
-        viewModel.loadPopular();
     }
+
 
     private void initSlider() {
         binding.progressBarSlider.setVisibility(View.VISIBLE);
