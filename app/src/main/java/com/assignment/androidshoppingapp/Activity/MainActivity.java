@@ -1,11 +1,15 @@
 package com.assignment.androidshoppingapp.Activity;
 
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -17,6 +21,10 @@ import com.assignment.androidshoppingapp.Adapter.SearchAdapter;
 import com.assignment.androidshoppingapp.Adapter.SliderAdapter;
 import com.assignment.androidshoppingapp.Domain.BannerModel;
 import com.assignment.androidshoppingapp.Domain.ItemsModel;
+import com.assignment.androidshoppingapp.Helper.ChatRequest;
+import com.assignment.androidshoppingapp.Helper.ChatResponse;
+import com.assignment.androidshoppingapp.Helper.OpenAIApi;
+import com.assignment.androidshoppingapp.Helper.Message;
 import com.assignment.androidshoppingapp.R;
 import com.assignment.androidshoppingapp.ViewModel.MainViewModel;
 import com.assignment.androidshoppingapp.databinding.ActivityMainBinding;
@@ -31,11 +39,11 @@ import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -45,6 +53,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -59,10 +77,13 @@ public class MainActivity extends AppCompatActivity {
 
     private ArrayList<ItemsModel> allItems;
     private ArrayList<ItemsModel> allPopularItems = new ArrayList<>();
-    private ArrayList<ItemsModel> searchResults = new ArrayList<>();
     private PopularAdapter popularAdapter;
+
+
     private SearchAdapter searchAdapter;
     private RecyclerView searchResultView;
+    private SearchView searchField;
+    private ArrayList<ItemsModel> searchList = new ArrayList<>();
 
 
     @Override
@@ -85,22 +106,18 @@ public class MainActivity extends AppCompatActivity {
         searchResultView = findViewById(R.id.searchResultView);
         searchResultView.setLayoutManager(new LinearLayoutManager(this));
 
-        binding.editTextText.addTextChangedListener(new TextWatcher() {
+        searchField = findViewById(R.id.searchView);
+        searchField.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String query = s.toString();
-                if (!query.isEmpty()) {
-                    performSearch(query);
-                } else {
-                    resetSearch();
-                }
+            public boolean onQueryTextSubmit(String query) {
+                fetchProductsFromAI(query);
+                return true;
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
         });
 
         // Thêm chức năng vuốt để xóa
@@ -110,8 +127,10 @@ public class MainActivity extends AppCompatActivity {
         String userName = intent.getStringExtra("name");
         if (userName != null && !userName.isEmpty()) {
             binding.textView5.setText(userName);
+            binding.constraintLayout2.setVisibility(VISIBLE);
         } else {
             binding.textView5.setText("Guest");
+            binding.constraintLayout2.setVisibility(View.GONE);
         }
 
         initCategory();
@@ -128,31 +147,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void performSearch(String query) {
-        searchResults.clear();
-        for (ItemsModel item : allPopularItems) {
-            if (item.getTitle().toLowerCase().contains(query.toLowerCase())) {
-                searchResults.add(item);
-            }
-        }
-
-        // Hide existing content (Popular, Slider)
-        binding.popularView.setVisibility(View.GONE);
-        binding.viewPagerSlider.setVisibility(View.GONE);
-
-        // Show search results
-        searchAdapter = new SearchAdapter(searchResults);
-        searchResultView.setAdapter(searchAdapter);
-        searchResultView.setVisibility(View.VISIBLE);
-    }
-
-    private void resetSearch() {
-        searchResultView.setVisibility(View.GONE);
-
-        // Show original content again
-        binding.popularView.setVisibility(View.VISIBLE);
-        binding.viewPagerSlider.setVisibility(View.VISIBLE);
-    }
 
     private void setupSwipeToDelete() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -244,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Chưa có lịch sử thanh toán", Toast.LENGTH_SHORT).show();
                     isHistoryVisible = false;
                 } else {
-                    binding.historyContainer.setVisibility(View.VISIBLE); // Sử dụng historyContainer
+                    binding.historyContainer.setVisibility(VISIBLE); // Sử dụng historyContainer
                     binding.historyContainer.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in));
                     hasNotification = false;
                     updateBellIcon();
@@ -289,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initPopular() {
-        binding.progressBarPopular.setVisibility(View.VISIBLE);
+        binding.progressBarPopular.setVisibility(VISIBLE);
         allItems = new ArrayList<>();
         viewModel.loadPopular().observeForever(itemsModels -> {
             if (itemsModels != null && !itemsModels.isEmpty()) {
@@ -303,10 +297,14 @@ public class MainActivity extends AppCompatActivity {
 
                 // Initialize adapter for popular items
                 popularAdapter = new PopularAdapter(allPopularItems);
-                searchAdapter = new SearchAdapter(allPopularItems);
                 binding.popularView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
                 binding.popularView.setAdapter(popularAdapter);
                 binding.popularView.setNestedScrollingEnabled(true);
+
+                searchList = new ArrayList<>();
+                searchAdapter = new SearchAdapter(searchList);
+                searchResultView.setAdapter(searchAdapter);
+
             }
             binding.progressBarPopular.setVisibility(View.GONE);
         });
@@ -314,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void initSlider() {
-        binding.progressBarSlider.setVisibility(View.VISIBLE);
+        binding.progressBarSlider.setVisibility(VISIBLE);
         viewModel.loadBanner().observeForever(bannerModels -> {
             if (bannerModels != null && !bannerModels.isEmpty()) {
                 banners(bannerModels);
@@ -336,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initCategory() {
-        binding.progressBarCategory.setVisibility(View.VISIBLE);
+        binding.progressBarCategory.setVisibility(VISIBLE);
         viewModel.loadCategory().observeForever(categoryModels -> {
             binding.categoryView.setLayoutManager(new LinearLayoutManager(
                     MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
@@ -367,6 +365,100 @@ public class MainActivity extends AppCompatActivity {
         popularAdapter = new PopularAdapter(filteredItems);
         binding.popularView.setAdapter(popularAdapter);
         popularAdapter.notifyDataSetChanged();
+    }
+
+    private void fetchProductsFromAI(String query) {
+        TextView searchResponseText = findViewById(R.id.searchResponseText);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.openai.com/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        OpenAIApi api = retrofit.create(OpenAIApi.class);
+        List<Message> messages = new ArrayList<>();
+        messages.add(new Message("system", "Bạn là một trợ lý mua sắm. Câu trả lời của bạn là một JSON có định dạng như thế này {\"comment\":\"result\",\"titles\":[\"title1\",\"title2\"]}, bạn có thể cho biết suy nghĩ của bạn trong trường commment."));
+        String userQuery = "Tìm kiếm sảm phẩm liên quan đến (" + query + ") từ JSON dữ liệu: " + allItems.toString();
+        messages.add(new Message("user", userQuery));
+
+        searchResponseText.setText("Searching...");
+
+        Call<ChatResponse> call = api.getChatResponse(new ChatRequest(messages));
+        call.enqueue(new Callback<ChatResponse>() {
+            @Override
+            public void onResponse(Call<ChatResponse> call, Response<ChatResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String result = response.body().getChoices().get(0).getMessage().getContent();
+
+                    // Display the query in TextView
+                    // Parse response as JSON object
+                    try {
+                        JSONObject jsonObject = new JSONObject(result);
+                        String titlesArray = jsonObject.optString("comment");
+                        searchResponseText.setText(titlesArray);
+                    }
+                    catch (JSONException e) {
+                        searchResponseText.setText(result);
+                    }
+
+                    // Update the product list with parsed titles
+                    updateProductList(parseProductTitles(result));
+                } else {
+                    searchResponseText.setText("No products found for: " + query);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ChatResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Error fetching products", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private List<ItemsModel> parseProductTitles(String response) {
+        List<ItemsModel> products = new ArrayList<>();
+
+        // Ensure the response is not empty
+        if (response == null || response.trim().isEmpty()) {
+            return products;
+        }
+
+        try {
+            // Parse response as JSON object
+            JSONObject jsonObject = new JSONObject(response);
+
+            // Extract "titles" array
+            JSONArray titlesArray = jsonObject.optJSONArray("titles");
+
+            if (titlesArray != null) {
+                for (int i = 0; i < titlesArray.length(); i++) {
+                    String title = titlesArray.getString(i);
+
+                    // Filter and add matching items
+                    for (ItemsModel item : allItems) {
+                        if (item.getTitle().equalsIgnoreCase(title)) {
+                            products.add(item);
+                        }
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return products;
+    }
+
+
+
+
+
+    private void updateProductList(List<ItemsModel> newList) {
+        searchList.clear();
+        searchList.addAll(newList);
+        searchAdapter.notifyDataSetChanged();
+        searchResultView.setVisibility(VISIBLE);
     }
 
     private void loadUserNameFromFirebase() {

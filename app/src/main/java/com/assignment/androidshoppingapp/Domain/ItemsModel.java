@@ -116,4 +116,17 @@ public class ItemsModel implements Serializable {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    @Override
+    public String toString() {
+        return "{" +
+                "title='" + title + '\'' +
+                ", sale='" + offPercent + '\'' +
+                ", size=" + size +
+                ", color=" + color +
+                ", price=" + price +
+                ", rating=" + rating +
+                ", category='" + category + '\'' +
+                '}';
+    }
 }
