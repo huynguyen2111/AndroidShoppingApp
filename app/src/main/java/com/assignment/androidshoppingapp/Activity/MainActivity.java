@@ -71,9 +71,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String userName = intent.getStringExtra("name");
         if (userName != null && !userName.isEmpty()) {
-            binding.textView5.setText(userName); // Cập nhật tên người dùng thay cho "Tine Anderson"
+            binding.textView5.setText(userName);
         } else {
-            binding.textView5.setText("Guest"); // Giá trị mặc định nếu không có tên
+            binding.textView5.setText("Tine Anderson");
         }
 
         initCategory();
@@ -82,9 +82,15 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation();
         handleCheckoutResult();
         setupBellIcon();
+
+        // Thêm sự kiện click cho icon profile (imageView2)
+        binding.imageView2.setOnClickListener(v -> {
+            Intent profileIntent = new Intent(MainActivity.this, ProfileActivity.class);
+            profileIntent.putExtras(getIntent().getExtras()); // Truyền dữ liệu từ Intent hiện tại
+            startActivity(profileIntent);
+        });
     }
 
-    // Các phương thức khác giữ nguyên
     private void setupSwipeToDelete() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
@@ -202,10 +208,17 @@ public class MainActivity extends AppCompatActivity {
         binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
             public void onItemSelected(int i) {
+                Intent intent;
                 if (i == R.id.favorites) {
-                    startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
+                    intent = new Intent(MainActivity.this, FavoriteActivity.class);
+                    startActivity(intent);
                 } else if (i == R.id.cart) {
-                    startActivity(new Intent(MainActivity.this, CartActivity.class));
+                    intent = new Intent(MainActivity.this, CartActivity.class);
+                    startActivity(intent);
+                } else if (i == R.id.profile) { // Xử lý nút Profile trong bottom navigation
+                    intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    intent.putExtras(getIntent().getExtras()); // Truyền dữ liệu từ Intent hiện tại
+                    startActivity(intent);
                 }
             }
         });
