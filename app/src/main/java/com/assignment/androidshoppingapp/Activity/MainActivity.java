@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-
 import com.assignment.androidshoppingapp.Adapter.CategoryAdapter;
 import com.assignment.androidshoppingapp.Adapter.HistoryAdapter;
 import com.assignment.androidshoppingapp.Adapter.PopularAdapter;
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Khởi tạo danh sách lịch sử và sắp xếp
         historyList = new ArrayList<>(sharedPreferences.getStringSet(KEY_HISTORY, new HashSet<>()));
-        sortHistoryList(); // Sắp xếp danh sách theo thời gian giảm dần
+        sortHistoryList();
 
         historyAdapter = new HistoryAdapter(historyList);
         binding.historyView.setLayoutManager(new LinearLayoutManager(this));
@@ -67,6 +66,15 @@ public class MainActivity extends AppCompatActivity {
 
         // Thêm chức năng vuốt để xóa
         setupSwipeToDelete();
+
+        // Lấy dữ liệu từ Intent và cập nhật tên người dùng
+        Intent intent = getIntent();
+        String userName = intent.getStringExtra("name");
+        if (userName != null && !userName.isEmpty()) {
+            binding.textView5.setText(userName); // Cập nhật tên người dùng thay cho "Tine Anderson"
+        } else {
+            binding.textView5.setText("Guest"); // Giá trị mặc định nếu không có tên
+        }
 
         initCategory();
         initSlider();
@@ -76,41 +84,33 @@ public class MainActivity extends AppCompatActivity {
         setupBellIcon();
     }
 
+    // Các phương thức khác giữ nguyên
     private void setupSwipeToDelete() {
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return false; // Không hỗ trợ kéo thả
+                return false;
             }
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 String itemToDelete = historyList.get(position);
-
-                // Xóa mục khỏi danh sách
                 historyList.remove(position);
                 historyAdapter.notifyItemRemoved(position);
-
-                // Cập nhật SharedPreferences
                 updateSharedPreferences();
-
-                // Nếu danh sách trống, ẩn historyView
                 if (historyList.isEmpty()) {
                     binding.historyView.setVisibility(View.GONE);
                     isHistoryVisible = false;
                 }
-
                 Toast.makeText(MainActivity.this, "Đã xóa: " + itemToDelete, Toast.LENGTH_SHORT).show();
             }
         };
-
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(binding.historyView);
     }
 
     private void updateSharedPreferences() {
-        // Cập nhật SharedPreferences với danh sách mới
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putStringSet(KEY_HISTORY, new HashSet<>(historyList));
         editor.apply();
@@ -127,33 +127,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void saveCheckoutHistory(String purchasedItems) {
-        // Thêm timestamp vào lịch sử
         String timestamp = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(new Date());
         String historyEntry = timestamp + " - " + purchasedItems;
-
-        // Lấy danh sách lịch sử hiện tại
         Set<String> historySet = sharedPreferences.getStringSet(KEY_HISTORY, new HashSet<>());
         Set<String> updatedHistory = new HashSet<>(historySet);
-
-        // Kiểm tra trùng lặp trước khi thêm
         if (!updatedHistory.contains(historyEntry)) {
             updatedHistory.add(historyEntry);
         }
-
-        // Lưu lại danh sách mới
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putStringSet(KEY_HISTORY, updatedHistory);
         editor.apply();
-
-        // Cập nhật danh sách hiển thị
         historyList.clear();
         historyList.addAll(updatedHistory);
-        sortHistoryList(); // Sắp xếp lại sau khi thêm
+        sortHistoryList();
         historyAdapter.notifyDataSetChanged();
     }
 
     private void sortHistoryList() {
-        // Sắp xếp theo thời gian giảm dần (mới nhất ở trên cùng)
         Collections.sort(historyList, new Comparator<String>() {
             @Override
             public int compare(String o1, String o2) {
@@ -161,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
                     Date date1 = sdf.parse(o1.split(" - ")[0]);
                     Date date2 = sdf.parse(o2.split(" - ")[0]);
-                    return date2.compareTo(date1); // Giảm dần
+                    return date2.compareTo(date1);
                 } catch (Exception e) {
                     return 0;
                 }
@@ -179,7 +169,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupBellIcon() {
         binding.imageView3.setOnClickListener(v -> {
-            // Toggle hiển thị/ẩn lịch sử
             isHistoryVisible = !isHistoryVisible;
             if (isHistoryVisible) {
                 if (historyList.isEmpty()) {
@@ -188,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     binding.historyView.setVisibility(View.VISIBLE);
                     binding.historyView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in));
-                    hasNotification = false; // Xóa ký hiệu thông báo sau khi xem
+                    hasNotification = false;
                     updateBellIcon();
                 }
             } else {
@@ -217,21 +206,10 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
                 } else if (i == R.id.cart) {
                     startActivity(new Intent(MainActivity.this, CartActivity.class));
-                }else if (i == R.id.profile) {
-                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                    intent.putExtras(getIntent().getExtras());
-                    startActivity(intent);
                 }
-                // Xử lý các tab khác nếu cần
             }
         });
-
         binding.cartBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CartActivity.class)));
-        binding.imageView2.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-            intent.putExtras(getIntent().getExtras());
-            startActivity(intent);
-        });
     }
 
     private void initPopular() {
@@ -265,7 +243,6 @@ public class MainActivity extends AppCompatActivity {
         binding.viewPagerSlider.setClipChildren(false);
         binding.viewPagerSlider.setOffscreenPageLimit(3);
         binding.viewPagerSlider.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
-
         CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
         compositePageTransformer.addTransformer(new MarginPageTransformer(40));
         binding.viewPagerSlider.setPageTransformer(compositePageTransformer);
