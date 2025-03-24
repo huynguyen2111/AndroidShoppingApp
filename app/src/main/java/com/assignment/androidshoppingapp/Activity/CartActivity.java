@@ -13,6 +13,7 @@ import com.assignment.androidshoppingapp.Adapter.CartAdapter;
 import com.assignment.androidshoppingapp.Adapter.FavoriteAdapter;
 import com.assignment.androidshoppingapp.Domain.ItemsModel;
 import com.assignment.androidshoppingapp.Helper.ManagmentCart;
+import com.assignment.androidshoppingapp.R;
 import com.assignment.androidshoppingapp.databinding.ActivityCartBinding;
 
 public class CartActivity extends AppCompatActivity {
@@ -65,19 +66,22 @@ public class CartActivity extends AppCompatActivity {
         // Làm mới giao diện khi quay lại CartActivity
         initCartList();
         calculatorCart();
+        setupBottomNavigation();
     }
 
-    private void setupFavoriteList() {
-        if (managmentCart.getListCart().isEmpty()) {
-            binding.emptyTxt.setVisibility(View.VISIBLE);
-            binding.scrollView3.setVisibility(View.GONE);
-        } else {
-            binding.emptyTxt.setVisibility(View.GONE);
-            binding.scrollView3.setVisibility(View.VISIBLE);
-        }
-
-        binding.cartView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        binding.cartView.setAdapter(cartAdapter);
+    private void setupBottomNavigation() {
+        binding.bottomNavigation.setItemSelected(R.id.cart, true);
+        binding.bottomNavigation.setOnItemSelectedListener(i -> {
+            if (i == R.id.home) {
+                startActivity(new Intent(CartActivity.this, MainActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+            } else if (i == R.id.cart) {
+                startActivity(new Intent(CartActivity.this, CartActivity.class));
+                overridePendingTransition(0, 0);
+                finish();
+            }
+        });
     }
 
     private String getPurchasedItems() {
