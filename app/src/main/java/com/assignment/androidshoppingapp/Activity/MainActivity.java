@@ -17,6 +17,12 @@ import com.assignment.androidshoppingapp.Domain.BannerModel;
 import com.assignment.androidshoppingapp.R;
 import com.assignment.androidshoppingapp.ViewModel.MainViewModel;
 import com.assignment.androidshoppingapp.databinding.ActivityMainBinding;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import android.content.Intent;
@@ -27,6 +33,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -271,4 +278,40 @@ public class MainActivity extends AppCompatActivity {
             binding.progressBarCategory.setVisibility(View.GONE);
         });
     }
+
+    private void loadUserNameFromFirebase() {
+        Intent intent = getIntent();
+        String usernameUser = intent.getStringExtra("username"); // Giả sử username được truyền từ Intent ban đầu
+
+        if (usernameUser != null) {
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("User");
+            Query checkUserDatabase = reference.orderByChild("username").equalTo(usernameUser);
+
+            checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String nameFromDB = snapshot.child(usernameUser).child("name").getValue(String.class);
+                        if (nameFromDB != null && !nameFromDB.isEmpty()) {
+                            binding.textView5.setText(nameFromDB); // Cập nhật textView5 với tên từ Firebase
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Xử lý lỗi nếu cần
+                }
+            });
+        }
+    }
+
+    // Cập nhật textView5 khi màn hình được hiển thị lại
+    @Override
+    protected void onResume() {
+        super.onResume();
+        binding.bottomNavigation.setItemSelected(R.id.home, true);
+        loadUserNameFromFirebase(); // Gọi hàm để lấy tên mới nhất từ Firebase
+    }
+
 }
