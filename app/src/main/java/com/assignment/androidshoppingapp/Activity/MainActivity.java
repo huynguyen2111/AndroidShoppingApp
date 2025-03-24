@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         if (userName != null && !userName.isEmpty()) {
             binding.textView5.setText(userName);
         } else {
-            binding.textView5.setText("Tine Anderson");
+            binding.textView5.setText("Guest");
         }
 
         initCategory();
