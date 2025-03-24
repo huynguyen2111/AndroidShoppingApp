@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.assignment.androidshoppingapp.Adapter.CartAdapter;
+import com.assignment.androidshoppingapp.Adapter.FavoriteAdapter;
 import com.assignment.androidshoppingapp.Domain.ItemsModel;
 import com.assignment.androidshoppingapp.Helper.ManagmentCart;
 import com.assignment.androidshoppingapp.databinding.ActivityCartBinding;
@@ -64,6 +65,19 @@ public class CartActivity extends AppCompatActivity {
         // Làm mới giao diện khi quay lại CartActivity
         initCartList();
         calculatorCart();
+    }
+
+    private void setupFavoriteList() {
+        if (managmentCart.getListCart().isEmpty()) {
+            binding.emptyTxt.setVisibility(View.VISIBLE);
+            binding.scrollView3.setVisibility(View.GONE);
+        } else {
+            binding.emptyTxt.setVisibility(View.GONE);
+            binding.scrollView3.setVisibility(View.VISIBLE);
+        }
+
+        binding.cartView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        binding.cartView.setAdapter(cartAdapter);
     }
 
     private String getPurchasedItems() {
