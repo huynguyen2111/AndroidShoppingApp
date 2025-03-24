@@ -41,6 +41,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
+import com.assignment.androidshoppingapp.Domain.ItemsModel;
+
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MainViewModel viewModel;
@@ -51,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_HISTORY = "checkout_history";
     private HistoryAdapter historyAdapter;
     private ArrayList<String> historyList;
+    private PopularAdapter popularAdapter; // Thêm biến để lưu adapter
+    private ArrayList<ItemsModel> allItems; // Lưu toàn bộ danh sách sản phẩm
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         // Thêm sự kiện click cho icon profile (imageView2)
         binding.imageView2.setOnClickListener(v -> {
             Intent profileIntent = new Intent(MainActivity.this, ProfileActivity.class);
-            profileIntent.putExtras(getIntent().getExtras()); // Truyền dữ liệu từ Intent hiện tại
+            profileIntent.putExtras(getIntent().getExtras());
             startActivity(profileIntent);
         });
     }
@@ -222,9 +226,9 @@ public class MainActivity extends AppCompatActivity {
                 } else if (i == R.id.cart) {
                     intent = new Intent(MainActivity.this, CartActivity.class);
                     startActivity(intent);
-                } else if (i == R.id.profile) { // Xử lý nút Profile trong bottom navigation
+                } else if (i == R.id.profile) {
                     intent = new Intent(MainActivity.this, ProfileActivity.class);
-                    intent.putExtras(getIntent().getExtras()); // Truyền dữ liệu từ Intent hiện tại
+                    intent.putExtras(getIntent().getExtras());
                     startActivity(intent);
                 }
             }
@@ -234,11 +238,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void initPopular() {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
+        allItems = new ArrayList<>(); // Khởi tạo danh sách toàn bộ sản phẩm
         viewModel.loadPopular().observeForever(itemsModels -> {
             if (!itemsModels.isEmpty()) {
+                allItems.clear();
+                allItems.addAll(itemsModels); // Lưu toàn bộ sản phẩm
+                popularAdapter = new PopularAdapter(new ArrayList<>(allItems)); // Hiển thị toàn bộ sản phẩm ban đầu
                 binding.popularView.setLayoutManager(
                         new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-                binding.popularView.setAdapter(new PopularAdapter(itemsModels));
+                binding.popularView.setAdapter(popularAdapter);
                 binding.popularView.setNestedScrollingEnabled(true);
             }
             binding.progressBarPopular.setVisibility(View.GONE);
@@ -273,27 +281,48 @@ public class MainActivity extends AppCompatActivity {
         viewModel.loadCategory().observeForever(categoryModels -> {
             binding.categoryView.setLayoutManager(new LinearLayoutManager(
                     MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-            binding.categoryView.setAdapter(new CategoryAdapter(categoryModels));
+            // Truyền listener để xử lý sự kiện nhấn danh mục
+            binding.categoryView.setAdapter(new CategoryAdapter(categoryModels, categoryTitle -> {
+                filterItemsByCategory(categoryTitle); // Lọc sản phẩm theo danh mục
+            }));
             binding.categoryView.setNestedScrollingEnabled(true);
             binding.progressBarCategory.setVisibility(View.GONE);
         });
     }
 
+    // Hàm lọc sản phẩm theo danh mục
+    private void filterItemsByCategory(String categoryTitle) {
+        ArrayList<ItemsModel> filteredItems = new ArrayList<>();
+        if (categoryTitle.equals("All")) {
+            filteredItems.addAll(allItems); // Hiển thị toàn bộ sản phẩm
+        } else {
+            // Lọc sản phẩm theo danh mục
+            String categoryToFilter = categoryTitle.equals("Men") ? "Man" : categoryTitle; // Chuyển "Men" thành "Man"
+            for (ItemsModel item : allItems) {
+                if (item.getCategory().equals(categoryToFilter)) {
+                    filteredItems.add(item);
+                }
+            }
+        }
+        // Cập nhật adapter với danh sách đã lọc
+        popularAdapter = new PopularAdapter(filteredItems);
+        binding.popularView.setAdapter(popularAdapter);
+        popularAdapter.notifyDataSetChanged();
+    }
+
     private void loadUserNameFromFirebase() {
         Intent intent = getIntent();
-        String usernameUser = intent.getStringExtra("username"); // Giả sử username được truyền từ Intent ban đầu
-
+        String usernameUser = intent.getStringExtra("username");
         if (usernameUser != null) {
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference("User");
             Query checkUserDatabase = reference.orderByChild("username").equalTo(usernameUser);
-
             checkUserDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
                         String nameFromDB = snapshot.child(usernameUser).child("name").getValue(String.class);
                         if (nameFromDB != null && !nameFromDB.isEmpty()) {
-                            binding.textView5.setText(nameFromDB); // Cập nhật textView5 với tên từ Firebase
+                            binding.textView5.setText(nameFromDB);
                         }
                     }
                 }
@@ -306,12 +335,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Cập nhật textView5 khi màn hình được hiển thị lại
     @Override
     protected void onResume() {
         super.onResume();
         binding.bottomNavigation.setItemSelected(R.id.home, true);
-        loadUserNameFromFirebase(); // Gọi hàm để lấy tên mới nhất từ Firebase
+        loadUserNameFromFirebase();
     }
-
 }

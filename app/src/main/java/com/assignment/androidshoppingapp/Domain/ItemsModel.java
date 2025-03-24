@@ -15,6 +15,7 @@ public class ItemsModel implements Serializable {
     private int review;
     private double rating;
     private int NumberinCart;
+    private String category; // Thêm thuộc tính category
 
     public ItemsModel() {
     }
@@ -105,5 +106,14 @@ public class ItemsModel implements Serializable {
 
     public void setNumberinCart(int numberinCart) {
         NumberinCart = numberinCart;
+    }
+
+    // Getter và Setter cho category
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
