@@ -7,7 +7,18 @@
     android:layout_height="match_parent"
     android:background="@drawable/profile_background"
     tools:context=".Activity.ProfileActivity">
-    
+
+    <!-- Nút Back -->
+    <ImageView
+        android:id="@+id/backButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ImageView
         android:layout_width="100dp"
         android:layout_height="100dp"
@@ -43,7 +54,7 @@
         app:layout_constraintEnd_toEndOf="@id/titleName"
         app:layout_constraintStart_toStartOf="@id/titleName"
         app:layout_constraintTop_toBottomOf="@id/titleName"/>
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,48 +67,13 @@
         android:layout_marginTop="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/titleUsername">
+        app:layout_constraintTop_toBottomOf="@id/titleUsername">
 
+        <!-- Các trường thông tin -->
+        <!-- Name -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:elevation="5dp"
-                android:padding="8dp"
-                android:orientation="vertical">
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:elevation="5dp"
-                android:padding="8dp"
-                android:orientation="vertical">
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:elevation="5dp"
-                android:padding="8dp"
-                android:orientation="vertical">
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
             android:padding="8dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
@@ -124,7 +100,6 @@
                 android:textAlignment="viewEnd"
                 android:textColor="@color/grey"
                 android:textSize="18sp"/>
-
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -134,9 +109,10 @@
             android:alpha="0.5"
             android:background="@color/lavender"/>
 
+        <!-- Email -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:padding="8dp"
             android:orientation="horizontal">
@@ -160,7 +136,6 @@
                 android:textAlignment="viewEnd"
                 android:textColor="@color/grey"
                 android:textSize="18sp"/>
-
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -170,9 +145,10 @@
             android:alpha="0.5"
             android:background="@color/lavender"/>
 
+        <!-- Username -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:padding="8dp"
             android:orientation="horizontal">
@@ -196,7 +172,6 @@
                 android:textAlignment="viewEnd"
                 android:textColor="@color/grey"
                 android:textSize="18sp"/>
-
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -206,9 +181,10 @@
             android:alpha="0.5"
             android:background="@color/lavender"/>
 
+        <!-- Password -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:padding="8dp"
             android:orientation="horizontal">
@@ -232,7 +208,6 @@
                 android:textAlignment="viewEnd"
                 android:textColor="@color/grey"
                 android:textSize="18sp"/>
-
         </LinearLayout>
 
     </LinearLayout>
@@ -245,7 +220,7 @@
         android:text="Edit Profile"
         android:backgroundTint="@color/lavender"
         android:textSize="18sp"
-        app:cornerRadius = "20dp"
+        app:cornerRadius="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/linearLayout"
         app:layout_constraintStart_toStartOf="@id/linearLayout"

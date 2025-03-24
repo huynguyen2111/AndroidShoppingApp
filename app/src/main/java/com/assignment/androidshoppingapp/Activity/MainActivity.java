@@ -217,12 +217,21 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(MainActivity.this, FavoriteActivity.class));
                 } else if (i == R.id.cart) {
                     startActivity(new Intent(MainActivity.this, CartActivity.class));
+                }else if (i == R.id.profile) {
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    intent.putExtras(getIntent().getExtras());
+                    startActivity(intent);
                 }
                 // Xử lý các tab khác nếu cần
             }
         });
 
         binding.cartBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this, CartActivity.class)));
+        binding.imageView2.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            intent.putExtras(getIntent().getExtras());
+            startActivity(intent);
+        });
     }
 
     private void initPopular() {
