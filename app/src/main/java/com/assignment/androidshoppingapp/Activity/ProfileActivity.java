@@ -35,7 +35,6 @@ public class ProfileActivity extends AppCompatActivity {
         profileName = findViewById(R.id.profileName);
         profileEmail = findViewById(R.id.profileEmail);
         profileUsername = findViewById(R.id.profileUsername);
-        profilePassword = findViewById(R.id.profilePassword);
         titleName = findViewById(R.id.titleName);
         titleUsername = findViewById(R.id.titleUsername);
         editProfile = findViewById(R.id.editButton);
@@ -53,7 +52,7 @@ public class ProfileActivity extends AppCompatActivity {
             intent.putExtra("name", profileName.getText().toString());
             intent.putExtra("email", profileEmail.getText().toString());
             intent.putExtra("username", profileUsername.getText().toString());
-            intent.putExtra("password", profilePassword.getText().toString());
+//            intent.putExtra("password", profilePassword.getText().toString());
             startActivityForResult(intent, EDIT_PROFILE_REQUEST); // Mở EditProfileActivity với request code
         });
     }
@@ -73,7 +72,7 @@ public class ProfileActivity extends AppCompatActivity {
                         String nameFromDB = snapshot.child(usernameUser).child("name").getValue(String.class);
                         String emailFromDB = snapshot.child(usernameUser).child("email").getValue(String.class);
                         String usernameFromDB = snapshot.child(usernameUser).child("username").getValue(String.class);
-                        String passwordFromDB = snapshot.child(usernameUser).child("password").getValue(String.class);
+//                        String passwordFromDB = snapshot.child(usernameUser).child("password").getValue(String.class);
 
                         // Cập nhật giao diện
                         titleName.setText(nameFromDB);
@@ -81,7 +80,7 @@ public class ProfileActivity extends AppCompatActivity {
                         profileName.setText(nameFromDB);
                         profileEmail.setText(emailFromDB);
                         profileUsername.setText(usernameFromDB);
-                        profilePassword.setText(passwordFromDB);
+//                        profilePassword.setText(passwordFromDB);
                     }
                 }
 

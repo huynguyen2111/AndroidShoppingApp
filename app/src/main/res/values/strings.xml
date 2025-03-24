@@ -2,7 +2,7 @@
     <string name="app_name">AndroidShoppingApp</string>
     <string name="title_splash"><font color="#dc6f31">Your Shoping</font> Destination \nfor Everything</string>
     <string name="subtitle_splash">Get personalized recommendations \nEnjoy fast,free shipping</string>
-    <string name="signin">Already have an account? <font color="#dc6f31"> SignIn</font></string>
+    <string name="login">Already have an account? <font color="#dc6f31"> Login</font></string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>

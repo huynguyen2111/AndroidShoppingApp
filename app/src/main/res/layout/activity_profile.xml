@@ -70,23 +70,19 @@
         app:layout_constraintTop_toBottomOf="@id/titleUsername">
 
         <!-- Các trường thông tin -->
-        <!-- Name -->
+        <!-- Username -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_margin="10dp"
             android:padding="8dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/name"
                 android:layout_weight="1"
-                android:text="Name"
+                android:text="Username"
                 android:textStyle="bold"
                 android:textColor="@color/lavender"
                 android:textSize="18sp"/>
@@ -94,13 +90,14 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/profileName"
-                android:text="name"
+                android:id="@+id/profileUsername"
+                android:text="username"
                 android:layout_weight="1"
                 android:textAlignment="viewEnd"
                 android:textColor="@color/grey"
                 android:textSize="18sp"/>
         </LinearLayout>
+
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="match_parent"
@@ -145,20 +142,23 @@
             android:alpha="0.5"
             android:background="@color/lavender"/>
 
-        <!-- Username -->
+        <!-- Name -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
             android:padding="8dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/username"
+                android:id="@+id/name"
                 android:layout_weight="1"
-                android:text="Username"
+                android:text="Name"
                 android:textStyle="bold"
                 android:textColor="@color/lavender"
                 android:textSize="18sp"/>
@@ -166,8 +166,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/profileUsername"
-                android:text="username"
+                android:id="@+id/profileName"
+                android:text="name"
                 android:layout_weight="1"
                 android:textAlignment="viewEnd"
                 android:textColor="@color/grey"
@@ -180,35 +180,6 @@
             android:layout_margin="10dp"
             android:alpha="0.5"
             android:background="@color/lavender"/>
-
-        <!-- Password -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="8dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/password"
-                android:layout_weight="1"
-                android:text="Password"
-                android:textStyle="bold"
-                android:textColor="@color/lavender"
-                android:textSize="18sp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/profilePassword"
-                android:text="password"
-                android:layout_weight="1"
-                android:textAlignment="viewEnd"
-                android:textColor="@color/grey"
-                android:textSize="18sp"/>
-        </LinearLayout>
 
     </LinearLayout>
 
