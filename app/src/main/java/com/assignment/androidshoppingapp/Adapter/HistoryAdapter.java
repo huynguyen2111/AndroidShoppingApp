@@ -24,7 +24,16 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.binding.historyText.setText(historyList.get(position));
+        String historyEntry = historyList.get(position);
+        // Tách chuỗi thành thời gian và nội dung
+        String[] parts = historyEntry.split(" - ", 2); // Tách tại " - "
+        if (parts.length == 2) {
+            holder.binding.timestampText.setText(parts[0]); // Thời gian
+            holder.binding.purchasedItemsText.setText(parts[1]); // Nội dung
+        } else {
+            holder.binding.timestampText.setText(historyEntry); // Nếu không tách được, hiển thị toàn bộ
+            holder.binding.purchasedItemsText.setText("");
+        }
     }
 
     @Override

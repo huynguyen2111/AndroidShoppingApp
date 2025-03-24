@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
     private ArrayList<CategoryModel> items;
     private Context context;
-    private int selectedPosition = -1;
+    private int selectedPosition = 0;
     private int lastSelectedPosition = -1;
     private OnCategoryClickListener onCategoryClickListener; // Thêm listener
 

@@ -53,8 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_HISTORY = "checkout_history";
     private HistoryAdapter historyAdapter;
     private ArrayList<String> historyList;
-    private PopularAdapter popularAdapter; // Thêm biến để lưu adapter
-    private ArrayList<ItemsModel> allItems; // Lưu toàn bộ danh sách sản phẩm
+    private PopularAdapter popularAdapter;
+    private ArrayList<ItemsModel> allItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +64,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         viewModel = new MainViewModel();
 
-        // Khởi tạo SharedPreferences
         sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
 
-        // Khởi tạo danh sách lịch sử và sắp xếp
         historyList = new ArrayList<>(sharedPreferences.getStringSet(KEY_HISTORY, new HashSet<>()));
         sortHistoryList();
 
@@ -75,10 +73,8 @@ public class MainActivity extends AppCompatActivity {
         binding.historyView.setLayoutManager(new LinearLayoutManager(this));
         binding.historyView.setAdapter(historyAdapter);
 
-        // Thêm chức năng vuốt để xóa
         setupSwipeToDelete();
 
-        // Lấy dữ liệu từ Intent và cập nhật tên người dùng
         Intent intent = getIntent();
         String userName = intent.getStringExtra("name");
         if (userName != null && !userName.isEmpty()) {
@@ -94,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
         handleCheckoutResult();
         setupBellIcon();
 
-        // Thêm sự kiện click cho icon profile (imageView2)
         binding.imageView2.setOnClickListener(v -> {
             Intent profileIntent = new Intent(MainActivity.this, ProfileActivity.class);
             profileIntent.putExtras(getIntent().getExtras());
@@ -117,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 historyAdapter.notifyItemRemoved(position);
                 updateSharedPreferences();
                 if (historyList.isEmpty()) {
-                    binding.historyView.setVisibility(View.GONE);
+                    binding.historyContainer.setVisibility(View.GONE); // Sử dụng historyContainer
                     isHistoryVisible = false;
                 }
                 Toast.makeText(MainActivity.this, "Đã xóa: " + itemToDelete, Toast.LENGTH_SHORT).show();
@@ -192,8 +187,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "Chưa có lịch sử thanh toán", Toast.LENGTH_SHORT).show();
                     isHistoryVisible = false;
                 } else {
-                    binding.historyView.setVisibility(View.VISIBLE);
-                    binding.historyView.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in));
+                    binding.historyContainer.setVisibility(View.VISIBLE); // Sử dụng historyContainer
+                    binding.historyContainer.startAnimation(AnimationUtils.loadAnimation(this, R.anim.slide_in));
                     hasNotification = false;
                     updateBellIcon();
                 }
@@ -204,12 +199,12 @@ public class MainActivity extends AppCompatActivity {
                     public void onAnimationStart(Animation animation) {}
                     @Override
                     public void onAnimationEnd(Animation animation) {
-                        binding.historyView.setVisibility(View.GONE);
+                        binding.historyContainer.setVisibility(View.GONE); // Sử dụng historyContainer
                     }
                     @Override
                     public void onAnimationRepeat(Animation animation) {}
                 });
-                binding.historyView.startAnimation(slideOut);
+                binding.historyContainer.startAnimation(slideOut);
             }
         });
     }
@@ -238,12 +233,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void initPopular() {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
-        allItems = new ArrayList<>(); // Khởi tạo danh sách toàn bộ sản phẩm
+        allItems = new ArrayList<>();
         viewModel.loadPopular().observeForever(itemsModels -> {
             if (!itemsModels.isEmpty()) {
                 allItems.clear();
-                allItems.addAll(itemsModels); // Lưu toàn bộ sản phẩm
-                popularAdapter = new PopularAdapter(new ArrayList<>(allItems)); // Hiển thị toàn bộ sản phẩm ban đầu
+                allItems.addAll(itemsModels);
+                popularAdapter = new PopularAdapter(new ArrayList<>(allItems));
                 binding.popularView.setLayoutManager(
                         new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
                 binding.popularView.setAdapter(popularAdapter);
@@ -281,30 +276,30 @@ public class MainActivity extends AppCompatActivity {
         viewModel.loadCategory().observeForever(categoryModels -> {
             binding.categoryView.setLayoutManager(new LinearLayoutManager(
                     MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-            // Truyền listener để xử lý sự kiện nhấn danh mục
             binding.categoryView.setAdapter(new CategoryAdapter(categoryModels, categoryTitle -> {
-                filterItemsByCategory(categoryTitle); // Lọc sản phẩm theo danh mục
+                filterItemsByCategory(categoryTitle);
             }));
             binding.categoryView.setNestedScrollingEnabled(true);
             binding.progressBarCategory.setVisibility(View.GONE);
+
+            if (!categoryModels.isEmpty()) {
+                filterItemsByCategory("All");
+            }
         });
     }
 
-    // Hàm lọc sản phẩm theo danh mục
     private void filterItemsByCategory(String categoryTitle) {
         ArrayList<ItemsModel> filteredItems = new ArrayList<>();
         if (categoryTitle.equals("All")) {
-            filteredItems.addAll(allItems); // Hiển thị toàn bộ sản phẩm
+            filteredItems.addAll(allItems);
         } else {
-            // Lọc sản phẩm theo danh mục
-            String categoryToFilter = categoryTitle.equals("Men") ? "Man" : categoryTitle; // Chuyển "Men" thành "Man"
+            String categoryToFilter = categoryTitle.equals("Men") ? "Man" : categoryTitle;
             for (ItemsModel item : allItems) {
                 if (item.getCategory().equals(categoryToFilter)) {
                     filteredItems.add(item);
                 }
             }
         }
-        // Cập nhật adapter với danh sách đã lọc
         popularAdapter = new PopularAdapter(filteredItems);
         binding.popularView.setAdapter(popularAdapter);
         popularAdapter.notifyDataSetChanged();
@@ -329,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    // Xử lý lỗi nếu cần
                 }
             });
         }

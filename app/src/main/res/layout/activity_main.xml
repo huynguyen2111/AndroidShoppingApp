@@ -77,15 +77,35 @@
             </LinearLayout>
 
             <!-- Thêm RecyclerView để hiển thị lịch sử checkout -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/historyView"
+            <!-- Thay thế phần RecyclerView historyView hiện tại -->
+            <LinearLayout
+                android:id="@+id/historyContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
-                android:background="@drawable/white_bg"
+                android:orientation="vertical"
                 android:visibility="gone"
-                android:maxHeight="200dp"
-                android:padding="8dp" />
+                android:background="@drawable/white_background"
+                android:padding="16dp">
+
+                <!-- Tiêu đề -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Lịch sử mua hàng"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- RecyclerView hiển thị lịch sử -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/historyView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxHeight="200dp"
+                    android:padding="4dp" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
